@@ -4,12 +4,12 @@ from dateutil import relativedelta
 from django import views
 from django.core.serializers import serialize
 from django.contrib.auth import mixins
+from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from shapeshifter.views import MultiModelFormView
 
@@ -39,16 +39,23 @@ class TodoListView(mixins.LoginRequiredMixin, views.View):
         )
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["PATCH"])
 def todoComplete(request, pk):
-    # Get the params from the payload.
-    data = json.loads(request.body.decode("utf-8"))
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"error": "Invalid JSON payload."}, status=400)
 
-    todo = Todo.objects.get(pk=pk)
+    todo = get_object_or_404(Todo, pk=pk)
 
-    # Update the model
+    if todo.owner_id != request.user.id:
+        return JsonResponse({"error": "You do not have permission to modify this todo."}, status=403)
+
     if "completed" in data:
+        if not isinstance(data["completed"], bool):
+            return JsonResponse({"error": "'completed' must be a boolean."}, status=400)
+
         todo.complete = data["completed"]
         if todo.complete and todo.completionOdomSnapshot is None:
             # create the snapshot for this todo
@@ -114,12 +121,21 @@ def todoComplete(request, pk):
             todo.completionOdomSnapshot = None
     elif "mileage" in data:
         if todo.completionOdomSnapshot is None:
-            print("this should not happen")
+            return JsonResponse(
+                {"error": "Cannot set completion mileage for an incomplete todo."},
+                status=400,
+            )
+
         try:
             todo.completionOdomSnapshot.mileage = float(data["mileage"])
-        except e:
-            pass
+        except (TypeError, ValueError):
+            return JsonResponse({"error": "'mileage' must be a valid number."}, status=400)
         todo.completionOdomSnapshot.save()
+    else:
+        return JsonResponse(
+            {"error": "Payload must include either 'completed' or 'mileage'."},
+            status=400,
+        )
 
     todo.save()
 
