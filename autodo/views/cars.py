@@ -36,9 +36,12 @@ class CarListView(mixins.LoginRequiredMixin, generic.ListView):
 class CarDetailView(mixins.LoginRequiredMixin, generic.DetailView):
     model = Car
 
+    def get_queryset(self):
+        return Car.objects.filter(owner=self.request.user)
+
     def get_object(self):
         snaps = OdomSnapshot.objects.filter(owner=self.request.user)
-        car = get_object_or_404(Car, pk=self.kwargs["pk"])
+        car = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
         add_odom(car, snaps)
         return car
 
@@ -74,7 +77,13 @@ class CarUpdate(mixins.LoginRequiredMixin, generic.UpdateView):
     form_class = AddCarForm
     success_url = reverse_lazy("cars")
 
+    def get_queryset(self):
+        return Car.objects.filter(owner=self.request.user)
+
 
 class CarDelete(mixins.LoginRequiredMixin, generic.DeleteView):
     model = Car
     success_url = reverse_lazy("cars")
+
+    def get_queryset(self):
+        return Car.objects.filter(owner=self.request.user)

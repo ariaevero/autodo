@@ -1,3 +1,5 @@
+from statistics import mean
+
 from django.contrib.auth import mixins
 from django.views import generic
 from django.shortcuts import get_object_or_404
@@ -22,6 +24,80 @@ class RefuelingListView(mixins.LoginRequiredMixin, generic.ListView):
 
 class RefuelingDetailView(mixins.LoginRequiredMixin, generic.DetailView):
     model = Refueling
+
+    def get_queryset(self):
+        return Refueling.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data["fuel_analysis"] = self._build_fuel_analysis(self.object)
+        return data
+
+    def _build_fuel_analysis(self, refueling):
+        car_refuelings = (
+            Refueling.objects.filter(
+                owner=self.request.user,
+                odomSnapshot__car=refueling.odomSnapshot.car,
+            )
+            .select_related("odomSnapshot")
+            .order_by("odomSnapshot__date")
+        )
+
+        previous_refueling = (
+            car_refuelings.filter(odomSnapshot__date__lt=refueling.odomSnapshot.date)
+            .order_by("-odomSnapshot__date")
+            .first()
+        )
+        next_refueling = (
+            car_refuelings.filter(odomSnapshot__date__gt=refueling.odomSnapshot.date)
+            .order_by("odomSnapshot__date")
+            .first()
+        )
+
+        mpg_samples = []
+        ordered = list(car_refuelings)
+        for idx in range(1, len(ordered)):
+            previous = ordered[idx - 1]
+            current = ordered[idx]
+            distance = current.odomSnapshot.mileage - previous.odomSnapshot.mileage
+            if distance > 0 and current.amount > 0:
+                mpg_samples.append(distance / current.amount)
+
+        current_leg_mpg = None
+        distance_since_last = None
+        if previous_refueling:
+            distance_since_last = (
+                refueling.odomSnapshot.mileage - previous_refueling.odomSnapshot.mileage
+            )
+            if distance_since_last > 0 and refueling.amount > 0:
+                current_leg_mpg = distance_since_last / refueling.amount
+
+        average_mpg = mean(mpg_samples) if mpg_samples else None
+
+        anomaly = None
+        if current_leg_mpg and average_mpg and average_mpg > 0:
+            deviation = abs(current_leg_mpg - average_mpg) / average_mpg
+            if deviation >= 0.2:
+                anomaly = {
+                    "type": "fuel_efficiency",
+                    "message": "Fuel efficiency deviates by at least 20% from this vehicle's average.",
+                    "deviation_ratio": deviation,
+                }
+
+        return {
+            "previous_refueling": previous_refueling,
+            "next_refueling": next_refueling,
+            "distance_since_last": distance_since_last,
+            "current_leg_mpg": current_leg_mpg,
+            "average_mpg": average_mpg,
+            "estimated_next_refuel_miles": (
+                refueling.odomSnapshot.mileage + (average_mpg * refueling.amount)
+                if average_mpg and refueling.amount
+                else None
+            ),
+            "anomaly": anomaly,
+            "purchase_recorded_at": refueling.odomSnapshot.date,
+        }
 
 
 class RefuelingCreate(mixins.LoginRequiredMixin, MultiModelFormView):
@@ -73,6 +149,9 @@ class RefuelingUpdate(mixins.LoginRequiredMixin, MultiModelFormView):
     template_name = "autodo/odomsnapshot_form.html"
     success_url = reverse_lazy("refuelings")
 
+    def get_queryset(self):
+        return Refueling.objects.filter(owner=self.request.user)
+
     def get_forms(self):
         # override the form class instantiation to specify the car queryset
         form = AddOdomSnapshotForm(**self.get_form_kwargs(AddOdomSnapshotForm))
@@ -83,8 +162,12 @@ class RefuelingUpdate(mixins.LoginRequiredMixin, MultiModelFormView):
         }
 
     def get_instances(self):
-        r = Refueling.objects.get(pk=self.kwargs["pk"])
-        snap = OdomSnapshot.objects.get(pk=r.odomSnapshot.id)
+        r = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
+        snap = get_object_or_404(
+            OdomSnapshot,
+            pk=r.odomSnapshot.id,
+            owner=self.request.user,
+        )
 
         instances = {
             "addodomsnapshotform": snap,
@@ -96,3 +179,6 @@ class RefuelingUpdate(mixins.LoginRequiredMixin, MultiModelFormView):
 class OdomSnapshotDelete(mixins.LoginRequiredMixin, generic.DeleteView):
     model = OdomSnapshot
     success_url = reverse_lazy("refuelings")
+
+    def get_queryset(self):
+        return OdomSnapshot.objects.filter(owner=self.request.user)

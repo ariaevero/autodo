@@ -45,7 +45,7 @@ def todoComplete(request, pk):
     # Get the params from the payload.
     data = json.loads(request.body.decode("utf-8"))
 
-    todo = Todo.objects.get(pk=pk)
+    todo = get_object_or_404(Todo, pk=pk, owner=request.user)
 
     # Update the model
     if "completed" in data:
@@ -56,11 +56,12 @@ def todoComplete(request, pk):
             snap.owner = request.user
             snap.car = todo.car
             snap.date = timezone.now()
-            snap.mileage = (
-                OdomSnapshot.objects.filter(car=todo.car)
-                .order_by("-mileage")[0]
-                .mileage
+            latest_snapshot = (
+                OdomSnapshot.objects.filter(car=todo.car, owner=request.user)
+                .order_by("-mileage")
+                .first()
             )
+            snap.mileage = latest_snapshot.mileage if latest_snapshot else 0
             snap.save()
 
             todo.completionOdomSnapshot = snap
@@ -128,6 +129,9 @@ def todoComplete(request, pk):
 
 class TodoDetailView(mixins.LoginRequiredMixin, generic.DetailView):
     model = Todo
+
+    def get_queryset(self):
+        return Todo.objects.filter(owner=self.request.user)
 
 
 class TodoCreate(mixins.LoginRequiredMixin, MultiModelFormView):
@@ -246,10 +250,14 @@ class TodoUpdate(mixins.LoginRequiredMixin, MultiModelFormView):
         }
 
     def get_instances(self):
-        t = Todo.objects.get(pk=self.kwargs["pk"])
+        t = get_object_or_404(Todo, pk=self.kwargs["pk"], owner=self.request.user)
         snap = None
         if t.completionOdomSnapshot:
-            snap = OdomSnapshot.objects.get(pk=t.completionOdomSnapshot.id)
+            snap = get_object_or_404(
+                OdomSnapshot,
+                pk=t.completionOdomSnapshot.id,
+                owner=self.request.user,
+            )
 
         return {
             "addtodoform": t,
@@ -285,3 +293,6 @@ class TodoUpdate(mixins.LoginRequiredMixin, MultiModelFormView):
 class TodoDelete(mixins.LoginRequiredMixin, generic.DeleteView):
     model = Todo
     success_url = reverse_lazy("home")
+
+    def get_queryset(self):
+        return Todo.objects.filter(owner=self.request.user)

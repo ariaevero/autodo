@@ -45,10 +45,16 @@ class ProfileScreen(mixins.LoginRequiredMixin, generic.DetailView):
     model = User
     context_object_name = "user_object"
 
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.pk)
+
 
 class UserDelete(mixins.LoginRequiredMixin, generic.DeleteView):
     model = User
     success_url = "/"
+
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.pk)
 
 
 class Settings(mixins.LoginRequiredMixin, views.View):
