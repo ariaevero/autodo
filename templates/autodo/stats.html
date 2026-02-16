@@ -49,6 +49,17 @@ Stats - {{ block.super }}
       Fuel Usage per Month
       <canvas id="fuelUsageByMonth"></canvas>
     </div>
+    <div
+      class="col-span-12 row-span-2 bg-gray-100 dark:bg-background_med rounded-lg shadow-sm p-4">
+      <div class="text-lg font-semibold mb-2">Lifecycle Snapshot</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+        <div>Components: <b>{{ lifecycle.components|length }}</b></div>
+        <div>Schedules: <b>{{ lifecycle.maintenance_schedules|length }}</b></div>
+        <div>Work Orders: <b>{{ lifecycle.work_orders|length }}</b></div>
+        <div>Defects: <b>{{ lifecycle.defect_reports|length }}</b></div>
+      </div>
+      <div class="text-xs opacity-80 mt-2">{{ lifecycle.traceability_note }}</div>
+    </div>
   </div>
 </div>
 

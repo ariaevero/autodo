@@ -32,6 +32,20 @@ from autodo.views.todos import (
     todoComplete,
 )
 
+from autodo.views.lifecycle import (
+    LifecycleDashboardView,
+    AssetComponentListView,
+    AssetComponentCreateView,
+    MaintenanceScheduleListView,
+    MaintenanceScheduleCreateView,
+    DefectReportListView,
+    DefectReportCreateView,
+    WorkOrderListView,
+    WorkOrderCreateView,
+    PartReplacementListView,
+    PartReplacementCreateView,
+)
+
 from autodo.views.stats import (
     fuelEfficiencyStats,
     fuelUsageByCarStats,
@@ -99,5 +113,16 @@ urlpatterns = [
     path(
         "stats/refuelingsLogged", refuelingsLoggedStats, name="stats/refuelingsLogged"
     ),
+    path("lifecycle/", LifecycleDashboardView.as_view(), name="lifecycle"),
+    path("lifecycle/components/", AssetComponentListView.as_view(), name="lifecycle/components"),
+    path("lifecycle/components/create/", AssetComponentCreateView.as_view(), name="lifecycle/components/create"),
+    path("lifecycle/schedules/", MaintenanceScheduleListView.as_view(), name="lifecycle/schedules"),
+    path("lifecycle/schedules/create/", MaintenanceScheduleCreateView.as_view(), name="lifecycle/schedules/create"),
+    path("lifecycle/defects/", DefectReportListView.as_view(), name="lifecycle/defects"),
+    path("lifecycle/defects/create/", DefectReportCreateView.as_view(), name="lifecycle/defects/create"),
+    path("lifecycle/workorders/", WorkOrderListView.as_view(), name="lifecycle/workorders"),
+    path("lifecycle/workorders/create/", WorkOrderCreateView.as_view(), name="lifecycle/workorders/create"),
+    path("lifecycle/replacements/", PartReplacementListView.as_view(), name="lifecycle/replacements"),
+    path("lifecycle/replacements/create/", PartReplacementCreateView.as_view(), name="lifecycle/replacements/create"),
     path("settings/", Settings.as_view(), name="settings"),
 ]

@@ -8,7 +8,18 @@ from django import views
 from django.views import generic
 from django.contrib.auth import mixins, authenticate, login
 
-from autodo.models import User, Car, Todo, OdomSnapshot, Refueling
+from autodo.models import (
+    User,
+    Car,
+    Todo,
+    OdomSnapshot,
+    Refueling,
+    AssetComponent,
+    MaintenanceSchedule,
+    DefectReport,
+    WorkOrder,
+    PartReplacement,
+)
 from autodo.forms import RegisterForm, SettingsForm
 from autodo.filters import TodoFilter
 
@@ -45,6 +56,11 @@ class Stats(mixins.LoginRequiredMixin, views.View):
 
     def _build_lifecycle_context(self, user):
         cars = Car.objects.filter(owner=user).order_by("name")
+        components_qs = AssetComponent.objects.filter(owner=user).select_related("car")
+        schedules_qs = MaintenanceSchedule.objects.filter(owner=user).select_related("car", "component")
+        defects_qs = DefectReport.objects.filter(owner=user).select_related("car", "component")
+        work_orders_qs = WorkOrder.objects.filter(owner=user).select_related("car", "component", "defect_report", "schedule")
+        replacements_qs = PartReplacement.objects.filter(owner=user).select_related("car", "component", "work_order")
         todos = (
             Todo.objects.filter(owner=user)
             .select_related("car", "completionOdomSnapshot")
@@ -73,6 +89,19 @@ class Stats(mixins.LoginRequiredMixin, views.View):
                     "plate": car.plate,
                     "latest_odometer": latest_snap.mileage if latest_snap else None,
                     "latest_odometer_at": latest_snap.date if latest_snap else None,
+                }
+            )
+
+        for component in components_qs:
+            components.append(
+                {
+                    "car_id": component.car_id,
+                    "component_name": component.name,
+                    "serial_number": component.serial_number,
+                    "plate": component.car.plate,
+                    "latest_odometer": None,
+                    "latest_odometer_at": component.installed_at,
+                    "status": component.lifecycle_status,
                 }
             )
 
@@ -122,6 +151,57 @@ class Stats(mixins.LoginRequiredMixin, views.View):
                     }
                 )
 
+        for schedule in schedules_qs:
+            schedules_by_car[schedule.car_id].append(
+                {
+                    "schedule_id": schedule.id,
+                    "title": schedule.title,
+                    "due_date": schedule.next_due_date,
+                    "due_mileage": schedule.next_due_mileage,
+                    "completed": False,
+                    "requirements": schedule.description or "",
+                }
+            )
+
+        for replacement in replacements_qs:
+            replacements_by_car[replacement.car_id].append(
+                {
+                    "replacement_id": replacement.id,
+                    "title": replacement.part_name,
+                    "completed": True,
+                    "completion_date": replacement.replaced_at,
+                    "completion_mileage": replacement.odometer_mileage,
+                    "requirements": replacement.supplier or "",
+                }
+            )
+
+        defects.extend(
+            [
+                {
+                    "defect_id": d.id,
+                    "title": d.title,
+                    "severity": d.severity,
+                    "status": d.status,
+                    "detected_at": d.detected_at,
+                }
+                for d in defects_qs
+            ]
+        )
+
+        work_orders.extend(
+            [
+                {
+                    "work_order_id": w.id,
+                    "title": w.title,
+                    "status": w.status,
+                    "priority": w.priority,
+                    "opened_at": w.opened_at,
+                    "due_at": w.due_at,
+                }
+                for w in work_orders_qs
+            ]
+        )
+
         forecast = {}
         for car in cars:
             car_refuelings = [
@@ -150,7 +230,7 @@ class Stats(mixins.LoginRequiredMixin, views.View):
             "work_orders": work_orders,
             "requirements": requirement_links,
             "fuel_forecast": forecast,
-            "traceability_note": "Serial number traceability uses vehicle VIN; requirement/work-order/defect tagging can be entered in todo notes.",
+            "traceability_note": "Lifecycle module now tracks serialized components, work orders, defects, schedules, and replacements in dedicated models.",
         }
 
 
