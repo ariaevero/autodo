@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class="container mx-auto p-6 dark:text-gray-200">
+  <h1 class="text-2xl mb-3">Part Replacements</h1>
+  <a href="{% url 'lifecycle/replacements/create' %}" class="bg-blue-500 text-white px-3 py-2 rounded">Log Replacement</a>
+  <ul class="mt-4">
+    {% for item in object_list %}
+      <li class="py-2 border-b border-gray-300">{{ item.part_name }} — {{ item.replaced_at|date:"Y-m-d" }} ({{ item.part_serial_number|default:"no serial" }})</li>
+    {% empty %}<li>No replacements yet.</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

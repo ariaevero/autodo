@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class="container mx-auto p-6 dark:text-gray-200">
+  <h1 class="text-2xl mb-3">Work Orders</h1>
+  <a href="{% url 'lifecycle/workorders/create' %}" class="bg-blue-500 text-white px-3 py-2 rounded">Create Work Order</a>
+  <ul class="mt-4">
+    {% for item in object_list %}
+      <li class="py-2 border-b border-gray-300">{{ item.title }} — {{ item.get_status_display }} ({{ item.get_priority_display }})</li>
+    {% empty %}<li>No work orders yet.</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

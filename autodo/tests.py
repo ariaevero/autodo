@@ -1,19 +1,9 @@
-from django.contrib.auth.models import AnonymousUser, User
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 
-from .views import index
+from autodo.models import User
 
 
-class SimpleTest(TestCase):
-    def setUp(self):
-        # Every test needs access to the request factory.
-        self.factory = RequestFactory()
-
-    def test_details(self):
-        # Create an instance of a GET request.
-        request = self.factory.get("/")
-        request.user = AnonymousUser()
-
-        # Test my_view() as if it were deployed at /customer/details
-        response = index(request)
-        self.assertEqual(response.status_code, 200)
+class UserModelTest(TestCase):
+    def test_user_creation(self):
+        user = User.objects.create_user(username="tester", password="secret")
+        self.assertEqual(user.username, "tester")

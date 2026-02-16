@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class="w-full h-dashboard dark:bg-background_dark dark:text-gray-200">
+  <div class="container mx-auto p-6 max-w-5xl">
+    <h1 class="text-3xl font-bold mb-4">Lifecycle & Maintenance</h1>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div class="bg-gray-100 dark:bg-background_med rounded p-4">Components<br><b>{{ component_count }}</b></div>
+      <div class="bg-gray-100 dark:bg-background_med rounded p-4">Active Schedules<br><b>{{ active_schedule_count }}</b></div>
+      <div class="bg-gray-100 dark:bg-background_med rounded p-4">Open Work Orders<br><b>{{ open_work_order_count }}</b></div>
+      <div class="bg-gray-100 dark:bg-background_med rounded p-4">Open Defects<br><b>{{ open_defect_count }}</b></div>
+      <div class="bg-gray-100 dark:bg-background_med rounded p-4">Replacements<br><b>{{ replacement_count }}</b></div>
+    </div>
+    <div class="flex gap-2 mb-6 flex-wrap">
+      <a class="bg-blue-500 text-white px-3 py-2 rounded" href="{% url 'lifecycle/components' %}">Components</a>
+      <a class="bg-blue-500 text-white px-3 py-2 rounded" href="{% url 'lifecycle/schedules' %}">Schedules</a>
+      <a class="bg-blue-500 text-white px-3 py-2 rounded" href="{% url 'lifecycle/workorders' %}">Work Orders</a>
+      <a class="bg-blue-500 text-white px-3 py-2 rounded" href="{% url 'lifecycle/defects' %}">Defects</a>
+      <a class="bg-blue-500 text-white px-3 py-2 rounded" href="{% url 'lifecycle/replacements' %}">Replacements</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

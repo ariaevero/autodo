@@ -7,7 +7,21 @@ from extra_views import InlineFormSetFactory
 from djmoney.forms.fields import MoneyField, MoneyWidget
 from djmoney.settings import CURRENCY_CHOICES
 
-from autodo.models import Car, OdomSnapshot, User, Refueling, Todo
+from autodo.models import (
+    Car,
+    OdomSnapshot,
+    User,
+    Refueling,
+    Todo,
+    AssetComponent,
+    MaintenanceSchedule,
+    MaintenanceRequirement,
+    DefectReport,
+    WorkOrder,
+    WorkOrderRequirement,
+    WorkOrderAction,
+    PartReplacement,
+)
 
 default_form_classes = [
     "bg-gray-50",
@@ -310,3 +324,93 @@ class SettingsForm(forms.Form):
             }
         ),
     )
+
+
+class AssetComponentForm(forms.ModelForm):
+    class Meta:
+        model = AssetComponent
+        exclude = ["owner"]
+        widgets = {
+            "car": forms.Select(attrs={"class": default_form_class}),
+            "name": forms.TextInput(attrs={"class": default_form_class}),
+            "serial_number": forms.TextInput(attrs={"class": default_form_class}),
+            "manufacturer": forms.TextInput(attrs={"class": default_form_class}),
+            "installed_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "removed_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "lifecycle_status": forms.Select(attrs={"class": default_form_class}),
+            "notes": forms.Textarea(attrs={"class": default_form_class}),
+        }
+
+
+class MaintenanceScheduleForm(forms.ModelForm):
+    class Meta:
+        model = MaintenanceSchedule
+        exclude = ["owner"]
+        widgets = {
+            "car": forms.Select(attrs={"class": default_form_class}),
+            "component": forms.Select(attrs={"class": default_form_class}),
+            "title": forms.TextInput(attrs={"class": default_form_class}),
+            "description": forms.Textarea(attrs={"class": default_form_class}),
+            "interval_days": forms.NumberInput(attrs={"class": default_form_class, "inputmode": "numeric"}),
+            "interval_mileage": forms.NumberInput(attrs={"class": default_form_class, "inputmode": "decimal"}),
+            "next_due_date": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "next_due_mileage": forms.NumberInput(attrs={"class": default_form_class, "inputmode": "decimal"}),
+        }
+
+
+class DefectReportForm(forms.ModelForm):
+    class Meta:
+        model = DefectReport
+        exclude = ["owner"]
+        widgets = {
+            "car": forms.Select(attrs={"class": default_form_class}),
+            "component": forms.Select(attrs={"class": default_form_class}),
+            "reported_by": forms.Select(attrs={"class": default_form_class}),
+            "title": forms.TextInput(attrs={"class": default_form_class}),
+            "description": forms.Textarea(attrs={"class": default_form_class}),
+            "severity": forms.Select(attrs={"class": default_form_class}),
+            "status": forms.Select(attrs={"class": default_form_class}),
+            "detected_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "resolved_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "root_cause": forms.Textarea(attrs={"class": default_form_class}),
+            "corrective_action": forms.Textarea(attrs={"class": default_form_class}),
+            "preventive_action": forms.Textarea(attrs={"class": default_form_class}),
+        }
+
+
+class WorkOrderForm(forms.ModelForm):
+    class Meta:
+        model = WorkOrder
+        exclude = ["owner"]
+        widgets = {
+            "car": forms.Select(attrs={"class": default_form_class}),
+            "component": forms.Select(attrs={"class": default_form_class}),
+            "schedule": forms.Select(attrs={"class": default_form_class}),
+            "defect_report": forms.Select(attrs={"class": default_form_class}),
+            "title": forms.TextInput(attrs={"class": default_form_class}),
+            "description": forms.Textarea(attrs={"class": default_form_class}),
+            "status": forms.Select(attrs={"class": default_form_class}),
+            "priority": forms.Select(attrs={"class": default_form_class}),
+            "opened_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "due_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "completed_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "assigned_to": forms.Select(attrs={"class": default_form_class}),
+            "created_by": forms.Select(attrs={"class": default_form_class}),
+        }
+
+
+class PartReplacementForm(forms.ModelForm):
+    class Meta:
+        model = PartReplacement
+        exclude = ["owner"]
+        widgets = {
+            "work_order": forms.Select(attrs={"class": default_form_class}),
+            "car": forms.Select(attrs={"class": default_form_class}),
+            "component": forms.Select(attrs={"class": default_form_class}),
+            "part_name": forms.TextInput(attrs={"class": default_form_class}),
+            "part_serial_number": forms.TextInput(attrs={"class": default_form_class}),
+            "replaced_at": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "odometer_mileage": forms.NumberInput(attrs={"class": default_form_class, "inputmode": "decimal"}),
+            "supplier": forms.TextInput(attrs={"class": default_form_class}),
+            "cost_amount": forms.NumberInput(attrs={"class": default_form_class, "inputmode": "decimal"}),
+        }

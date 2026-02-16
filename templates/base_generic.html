@@ -161,7 +161,31 @@
                   text-sm
                   font-medium
                 ">Stats</a>
-            <a href="{% url 'cars' %}" class="
+            <a href="{% url 'lifecycle' %}" class="
+                  {% if request.path == '/lifecycle/' %}
+                    bg-gray-900
+                    text-white
+                  {% else %}
+                    text-gray-900
+                    dark:text-gray-200
+                    hover:bg-gray-700
+                    hover:text-white
+                  {% endif %}
+                  px-3
+                  py-2
+                  rounded-md
+                  text-sm
+                  font-medium
+                ">Lifecycle</a>
+            <a href="{% url 'lifecycle' %}" class="
+            {% if request.path == '/lifecycle/' %}
+            bg-gray-900 text-white
+            {% else %}
+            text-gray-900 dark:text-gray-200 hover:bg-gray-700 hover:text-white
+            {% endif %}
+            block px-3 py-2 rounded-md text-base font-medium">Lifecycle</a>
+
+      <a href="{% url 'cars' %}" class="
                   {% if request.path == '/cars/' %}
                     bg-gray-900
                     text-white
@@ -354,6 +378,14 @@
             text-base
             font-medium
           ">Stats</a>
+      <a href="{% url 'lifecycle' %}" class="
+            {% if request.path == '/lifecycle/' %}
+            bg-gray-900 text-white
+            {% else %}
+            text-gray-900 dark:text-gray-200 hover:bg-gray-700 hover:text-white
+            {% endif %}
+            block px-3 py-2 rounded-md text-base font-medium">Lifecycle</a>
+
       <a href="{% url 'cars' %}" class="
             {%
             if
