@@ -3,10 +3,9 @@ from functools import reduce
 from itertools import groupby
 from statistics import mean
 from datetime import timezone
-import sys
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from autodo.models import Car, Refueling, OdomSnapshot, Todo
@@ -35,7 +34,7 @@ def ema(data: list) -> list:
     return ema
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["GET"])
 def fuelEfficiencyStats(request):
     data = defaultdict(dict)
@@ -59,7 +58,7 @@ def fuelEfficiencyStats(request):
     return JsonResponse(data)
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["GET"])
 def fuelUsageByCarStats(request):
     cars = Car.objects.filter(owner=request.user.id)
@@ -87,7 +86,7 @@ def single_distance_rate(i, j):
     return (j.mileage - i.mileage) / dayDiff
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["GET"])
 def drivingRateStats(request):
     data = {}
@@ -115,7 +114,7 @@ def drivingRateStats(request):
     return JsonResponse(data)
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["GET"])
 def fuelUsageByMonthStats(request):
     data = {}
@@ -146,7 +145,7 @@ def fuelUsageByMonthStats(request):
     return JsonResponse(data)
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["GET"])
 def completedTodosStats(request):
     return JsonResponse(
@@ -158,7 +157,7 @@ def completedTodosStats(request):
     )
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["GET"])
 def refuelingsLoggedStats(request):
     return JsonResponse(

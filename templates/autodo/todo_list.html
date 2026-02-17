@@ -101,6 +101,24 @@
     window.attachEvent('onload', handleLoad);
   }
 
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
+  axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
   function handleLoad(e) {
     var checkboxes = document.querySelectorAll('.todo-complete-check');
 
@@ -144,8 +162,10 @@
           dueMileage.classList.remove('hidden');
         }
       })
-      .catch(function () {
+      .catch(function (error) {
         checkbox.disabled = false;
+        var message = error?.response?.data?.error || 'Failed to update todo completion state.';
+        console.error(message, error);
       });
     e.preventDefault();
   }
@@ -160,7 +180,9 @@
       .then(function (response) {
         console.log('Response received', response.statusText, response.data);
       })
-      .catch(function () {
+      .catch(function (error) {
+        var message = error?.response?.data?.error || 'Failed to update completion mileage.';
+        console.error(message, error);
       });
 
     e.preventDefault();
