@@ -5,12 +5,21 @@
   <div class="container p-8 mx-auto max-w-lg dark:text-gray-200">
     <div class="text-2xl">Car: <b>{{ car.name }}</b></div>
     <div class="py-2">
-      <div class="py-1">Mileage: <b>{{ car.mileage }}</b></div>
+      <div class="py-1">Mileage: <b>{{ car.mileage }}</b> km</div>
       <div class="py-1">Make: <b>{{ car.make }}</b></div>
       <div class="py-1">Model: <b>{{ car.model }}</b></div>
       <div class="py-1">Year: <b>{{ car.year }}</b></div>
       <div class="py-1">Plate: <b>{{ car.plate }}</b></div>
       <div class="py-1">VIN: <b>{{ car.vin }}</b></div>
+      <div class="py-1">Transmission: <b>{{ car.get_transmission_display }}</b></div>
+      <div class="py-1">Fuel Type: <b>{{ car.get_fuel_type_display }}</b></div>
+      <div class="py-1">Status: <b>{{ car.get_status_display }}</b></div>
+      <div class="py-1">Inspection Interval: <b>{{ car.inspection_interval_days }}</b> days</div>
+      <div class="py-1">Servicing Interval: <b>{{ car.servicing_interval_days }}</b> days</div>
+      <div class="py-1">Last Service Date: <b>{{ car.last_service_date }}</b></div>
+      <div class="py-1">Next Service Due: <b>{{ car.next_service_due_date }}</b></div>
+      <div class="py-1">Specs: <b>{{ car.specs }}</b></div>
+      <div class="py-1">Replacement Schedule: <b>{{ car.replacement_schedule }}</b></div>
     </div>
 
     <div class="my-2">

@@ -35,7 +35,7 @@ Stats - {{ block.super }}
     </div>
     <div
       class="col-span-6 row-span-4 grid grid-cols-3 justify-items-center items-center bg-gray-100 dark:bg-background_med rounded-lg shadow-sm p-4">
-      <div class="col-span-1">Fuel Usage by Car (gal)</div>
+      <div class="col-span-1">Fuel Usage by Car (L)</div>
       <div class="col-span-2"><canvas id="fuelUsageByCar"></canvas></div>
     </div>
 
@@ -98,7 +98,7 @@ Stats - {{ block.super }}
         y: {
           title: {
             display: true,
-            text: "Efficiency (MPG)",
+            text: "Efficiency (km/L)",
           }
         }
       },
@@ -131,7 +131,7 @@ Stats - {{ block.super }}
         y: {
           title: {
             display: true,
-            text: "Miles per Day",
+            text: "KM per Day",
           }
         }
       },
@@ -176,7 +176,7 @@ Stats - {{ block.super }}
           stacked: true,
           title: {
             display: true,
-            text: "Fuel Usage (gal)",
+            text: "Fuel Usage (L)",
           }
         }
       }

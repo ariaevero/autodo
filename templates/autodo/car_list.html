@@ -3,7 +3,7 @@
 <div class="w-full h-dashboard overflow-auto dark:bg-background_dark">
   <div class="container mx-auto p-4 max-w-3xl">
     {% if car_list|length < 1 %}
-    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 text-center">
+    <div class="kmn-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 text-center">
       <p>No cars, would you like to add one?</p>
       <div class="my-8">
         <a href="{% url 'cars/create' %}"
@@ -23,7 +23,7 @@
             {{ car.name}}
           </div>
           <div class="mx-2 dark:text-gray-200">
-            Mileage: <span class="font-bold">{{ car.mileage }}</span> mi
+            Mileage: <span class="font-bold">{{ car.mileage }}</span> km
           </div>
         </div>
         <div class="flex flex-col content-end">

@@ -20,7 +20,7 @@ Create Refueling - {{ block.super }}
     {% if forms|check_if_car_update %}
     <div class="text-2xl">Edit Refueling</div>
     {% else %}
-    <div class="text-2xl">Enter a Refueling</div>
+    <div class="text-2xl">Enter a Refueling (Litres & USD)</div>
     {% endif %}
 
     <form action="" method="post">
@@ -47,6 +47,7 @@ Create Refueling - {{ block.super }}
         Create
         {% endif %}
       </button>
+    <p class="text-xs text-gray-500 dark:text-gray-400">Price/Litre, total amount, and mileage are admin-controlled for data integrity.</p>
     </form>
   </div>
   <script>

@@ -5,9 +5,10 @@ from django.forms.models import inlineformset_factory
 from django.contrib.auth.forms import UserCreationForm
 from extra_views import InlineFormSetFactory
 from djmoney.forms.fields import MoneyField, MoneyWidget
-from djmoney.settings import CURRENCY_CHOICES
 
 from autodo.models import Car, OdomSnapshot, User, Refueling, Todo
+
+ADMIN_ONLY_REFUELING_FIELD_HELP = "This field is controlled by administrators only."
 
 default_form_classes = [
     "bg-gray-50",
@@ -42,12 +43,32 @@ class AddCarForm(forms.ModelForm):
             "year": forms.NumberInput(attrs={"class": default_form_class}),
             "plate": forms.TextInput(attrs={"class": default_form_class}),
             "vin": forms.TextInput(attrs={"class": default_form_class}),
+            "transmission": forms.Select(attrs={"class": default_form_class}),
+            "fuel_type": forms.Select(attrs={"class": default_form_class}),
+            "status": forms.Select(attrs={"class": default_form_class}),
+            "specs": forms.Textarea(attrs={"class": default_form_class + " h-24"}),
+            "inspection_interval_days": forms.NumberInput(attrs={"class": default_form_class}),
+            "servicing_interval_days": forms.NumberInput(attrs={"class": default_form_class}),
+            "last_service_date": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "next_service_due_date": forms.DateInput(attrs={"class": default_form_class, "type": "date"}),
+            "replacement_schedule": forms.Textarea(attrs={"class": default_form_class + " h-24"}),
             "color": forms.TextInput(
                 attrs={
                     "type": "color",
                     "class": "bg-gray-50 dark:bg-background_med w-12 my-2 py-1 px-4 border border-gray-400 dark:border-gray-800 rounded focus:outline-none focus:border-blue-500 placeholder-gray-500",
                 }
             ),
+        }
+        labels = {
+            "transmission": "Transmission",
+            "fuel_type": "Fuel Type",
+            "status": "Car Status",
+            "specs": "Vehicle Specs",
+            "inspection_interval_days": "Inspection Interval (days)",
+            "servicing_interval_days": "Servicing Interval (days)",
+            "last_service_date": "Last Service Date",
+            "next_service_due_date": "Next Service Due Date",
+            "replacement_schedule": "Replacement Schedule",
         }
 
 
@@ -110,50 +131,14 @@ class RefuelingForm(forms.ModelForm):
         widget=MoneyWidget(
             amount_widget=forms.TextInput(
                 attrs={
-                    "class": " ".join(
-                        [
-                            "bg-gray-50",
-                            "dark:bg-background_med",
-                            "my-2",
-                            "py-1",
-                            "px-4",
-                            "border",
-                            "border-gray-400",
-                            "dark:border-gray-800",
-                            "rounded",
-                            "focus:outline-none",
-                            "focus:border-blue-500",
-                            "placeholder-gray-500",
-                            "dark:placeholder-gray-300",
-                            "w-7/12",
-                        ]
-                    ),
+                    "class": default_form_class,
                     "inputmode": "decimal",
+                    "readonly": True,
+                    "title": ADMIN_ONLY_REFUELING_FIELD_HELP,
                 }
             ),
-            currency_widget=forms.Select(
-                choices=CURRENCY_CHOICES,
-                attrs={
-                    "class": " ".join(
-                        [
-                            "bg-gray-50",
-                            "dark:bg-background_med",
-                            "my-2",
-                            "py-1",
-                            "px-4",
-                            "border",
-                            "border-gray-400",
-                            "dark:border-gray-800",
-                            "rounded",
-                            "focus:outline-none",
-                            "focus:border-blue-500",
-                            "placeholder-gray-500",
-                            "dark:placeholder-gray-300",
-                            "w-5/12",
-                        ]
-                    ),
-                },
-            ),
+            currency_widget=forms.HiddenInput(),
+            default_currency="USD",
         )
     )
 
@@ -162,9 +147,22 @@ class RefuelingForm(forms.ModelForm):
         fields = ["cost", "amount"]
         widgets = {
             "amount": forms.NumberInput(
-                attrs={"class": default_form_class, "inputmode": "decimal"}
+                attrs={
+                    "class": default_form_class,
+                    "inputmode": "decimal",
+                    "readonly": True,
+                    "title": ADMIN_ONLY_REFUELING_FIELD_HELP,
+                }
             ),
         }
+        labels = {
+            "amount": "Amount (L)",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["cost"].help_text = ADMIN_ONLY_REFUELING_FIELD_HELP
+        self.fields["amount"].help_text = ADMIN_ONLY_REFUELING_FIELD_HELP
 
 
 RefuelingCreateFormset = inlineformset_factory(

@@ -22,17 +22,17 @@
             Refueling on {{ refueling.odomSnapshot.date|date:"D d M Y" }}
           </a>
           <div class="mx-2 text-lg">
-            At <span class="font-bold">{{ refueling.odomSnapshot.mileage }}</span> miles
+            At <span class="font-bold">{{ refueling.odomSnapshot.mileage }}</span> km
           </div>
           <div class="mx-2">
             Cost: <span class="font-bold">{{ refueling.cost }}</span>
           </div>
           <div class="mx-2">
-            Amount: <span class="font-bold">{{ refueling.amount }}</span> gallons
+            Amount: <span class="font-bold">{{ refueling.amount }}</span> L
           </div>
           <a style="background-color: {{ refueling.odomSnapshot.car.color }};"
             href="{% url 'cars/detail' refueling.odomSnapshot.car.id %}"
-            class="my-1 mx-2 rounded-lg w-min px-2 {% if todo.car.light_color %}text-black{% else %}text-white{% endif %} hover:shadow-md">
+            class="my-1 mx-2 rounded-lg w-min px-2 {% if refueling.odomSnapshot.car.light_color %}text-black{% else %}text-white{% endif %} hover:shadow-md">
             {{ refueling.odomSnapshot.car.name }}
           </a>
         </div>
