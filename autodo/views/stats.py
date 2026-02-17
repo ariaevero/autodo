@@ -3,12 +3,13 @@ from functools import reduce
 from itertools import groupby
 from statistics import mean
 from datetime import timezone
+from django.utils import timezone as dj_timezone
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
-from autodo.models import Car, Refueling, OdomSnapshot, Todo
+from autodo.models import Car, Refueling, OdomSnapshot, Todo, IncidentReport, ServiceRecord
 
 ALPHA = 0.3
 EMA_CUTOFF = 3  # EMA works best with some averages in the history
@@ -163,3 +164,43 @@ def refuelingsLoggedStats(request):
     return JsonResponse(
         {"count": Refueling.objects.filter(owner=request.user.id).count()}
     )
+
+
+@login_required
+@require_http_methods(["GET"])
+def openIncidentsStats(request):
+    count = IncidentReport.objects.filter(owner=request.user.id).exclude(status__iexact="closed").count()
+    return JsonResponse({"count": count})
+
+
+@login_required
+@require_http_methods(["GET"])
+def fleetDowntimeHoursStats(request):
+    incidents = IncidentReport.objects.filter(owner=request.user.id).exclude(downtime_start=None).exclude(downtime_end=None)
+    total_hours = 0.0
+    for i in incidents:
+        delta = i.downtime_end - i.downtime_start
+        total_hours += max(delta.total_seconds(), 0) / 3600
+    return JsonResponse({"hours": round(total_hours, 2)})
+
+
+@login_required
+@require_http_methods(["GET"])
+def maintenanceCostStats(request):
+    incident_cost = 0.0
+    for i in IncidentReport.objects.filter(owner=request.user.id):
+        if i.actual_cost:
+            incident_cost += float(i.actual_cost.amount)
+    service_cost = 0.0
+    for s in ServiceRecord.objects.filter(owner=request.user.id):
+        if s.total_cost:
+            service_cost += float(s.total_cost.amount)
+    return JsonResponse({"total": round(incident_cost + service_cost, 2)})
+
+
+@login_required
+@require_http_methods(["GET"])
+def serviceOverdueCarsStats(request):
+    today = dj_timezone.now().date()
+    count = Car.objects.filter(owner=request.user.id, next_service_due_date__lt=today).count()
+    return JsonResponse({"count": count})

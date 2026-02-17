@@ -39,6 +39,10 @@ from autodo.views.stats import (
     fuelUsageByMonthStats,
     completedTodosStats,
     refuelingsLoggedStats,
+    openIncidentsStats,
+    fleetDowntimeHoursStats,
+    maintenanceCostStats,
+    serviceOverdueCarsStats,
 )
 
 urlpatterns = [
@@ -99,5 +103,9 @@ urlpatterns = [
     path(
         "stats/refuelingsLogged", refuelingsLoggedStats, name="stats/refuelingsLogged"
     ),
+    path("stats/openIncidents", openIncidentsStats, name="stats/openIncidents"),
+    path("stats/fleetDowntimeHours", fleetDowntimeHoursStats, name="stats/fleetDowntimeHours"),
+    path("stats/maintenanceCost", maintenanceCostStats, name="stats/maintenanceCost"),
+    path("stats/serviceOverdueCars", serviceOverdueCarsStats, name="stats/serviceOverdueCars"),
     path("settings/", Settings.as_view(), name="settings"),
 ]
