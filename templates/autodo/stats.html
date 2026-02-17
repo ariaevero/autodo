@@ -34,6 +34,30 @@ Stats - {{ block.super }}
       </div>
     </div>
     <div
+      class="col-span-3 row-span-2 grid justify-items-center items-center bg-gray-100 dark:bg-background_med rounded-lg shadow-sm p-4">
+      <div>
+        Open Defects/Incidents: <span id="openIncidents" class="font-bold text-autodo text-3xl pl-2">0</span>
+      </div>
+    </div>
+    <div
+      class="col-span-3 row-span-2 grid justify-items-center items-center bg-gray-100 dark:bg-background_med rounded-lg shadow-sm p-4">
+      <div>
+        Downtime (hrs): <span id="downtimeHours" class="font-bold text-autodo text-3xl pl-2">0</span>
+      </div>
+    </div>
+    <div
+      class="col-span-3 row-span-2 grid justify-items-center items-center bg-gray-100 dark:bg-background_med rounded-lg shadow-sm p-4">
+      <div>
+        Maintenance Cost (USD): <span id="maintenanceCost" class="font-bold text-autodo text-3xl pl-2">0</span>
+      </div>
+    </div>
+    <div
+      class="col-span-3 row-span-2 grid justify-items-center items-center bg-gray-100 dark:bg-background_med rounded-lg shadow-sm p-4">
+      <div>
+        Overdue Service Cars: <span id="overdueServices" class="font-bold text-autodo text-3xl pl-2">0</span>
+      </div>
+    </div>
+    <div
       class="col-span-6 row-span-4 grid grid-cols-3 justify-items-center items-center bg-gray-100 dark:bg-background_med rounded-lg shadow-sm p-4">
       <div class="col-span-1">Fuel Usage by Car (L)</div>
       <div class="col-span-2"><canvas id="fuelUsageByCar"></canvas></div>
@@ -288,6 +312,42 @@ Stats - {{ block.super }}
         $("#refuelingsLogged").text(jsonResponse.count);
       },
       error: () => console.log("Failed to fetch chart data from refuelingsLogged!")
+    });
+    $.ajax({
+      url: "/stats/openIncidents",
+      type: "GET",
+      dataType: "json",
+      success: jsonResponse => {
+        $("#openIncidents").text(jsonResponse.count);
+      },
+      error: () => console.log("Failed to fetch chart data from openIncidents!")
+    });
+    $.ajax({
+      url: "/stats/fleetDowntimeHours",
+      type: "GET",
+      dataType: "json",
+      success: jsonResponse => {
+        $("#downtimeHours").text(jsonResponse.hours);
+      },
+      error: () => console.log("Failed to fetch chart data from fleetDowntimeHours!")
+    });
+    $.ajax({
+      url: "/stats/maintenanceCost",
+      type: "GET",
+      dataType: "json",
+      success: jsonResponse => {
+        $("#maintenanceCost").text(jsonResponse.total);
+      },
+      error: () => console.log("Failed to fetch chart data from maintenanceCost!")
+    });
+    $.ajax({
+      url: "/stats/serviceOverdueCars",
+      type: "GET",
+      dataType: "json",
+      success: jsonResponse => {
+        $("#overdueServices").text(jsonResponse.count);
+      },
+      error: () => console.log("Failed to fetch chart data from serviceOverdueCars!")
     });
   }
 </script>
